@@ -1,8 +1,8 @@
-name: Deploy 3procenta
+name: Deploy 3percents
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "work" ]
   workflow_dispatch:
 
 jobs:
