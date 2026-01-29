@@ -58,6 +58,7 @@
    DATA_FILE=/var/lib/telegram-carousel-bot/posts.json
    EOF
    ```
+   По умолчанию бот также использует путь `/var/lib/telegram-carousel-bot/posts.json`, поэтому хранение данных остаётся вне репозитория и не удаляется при автодеплое.
 6. Создайте директорию для данных и выдайте права:
    ```bash
    sudo mkdir -p /var/lib/telegram-carousel-bot

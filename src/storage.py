@@ -21,7 +21,8 @@ class PostStorage:
             return []
         with self._path.open("r", encoding="utf-8") as handle:
             raw = json.load(handle)
-        return [StoredPost(**item) for item in raw]
+        posts = [StoredPost(**item) for item in raw]
+        return sorted(posts, key=lambda item: item.message_id)
 
     def save(self, posts: List[StoredPost]) -> None:
         payload = [asdict(post) for post in posts]
@@ -39,6 +40,4 @@ class PostStorage:
 
 
 def eligible_posts(posts: List[StoredPost]) -> List[StoredPost]:
-    if len(posts) < 3:
-        return []
-    return posts[1:-1]
+    return posts
