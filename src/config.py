@@ -19,6 +19,11 @@ def load_config() -> Config:
 
     if not bot_token:
         raise ValueError("TELEGRAM_BOT_TOKEN is required")
+    if bot_token == "your-telegram-bot-token":
+        raise ValueError(
+            "TELEGRAM_BOT_TOKEN содержит пример значения. "
+            "Задайте реальный токен в .env или /etc/telegram-carousel-bot.env"
+        )
     if not channel_id:
         raise ValueError("CHANNEL_ID is required")
 

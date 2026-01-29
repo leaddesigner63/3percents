@@ -4,7 +4,7 @@
 
 ## Настройка
 
-1. Скопируйте/отредактируйте файл `.env` и укажите значения:
+1. Скопируйте `.env.example` в `.env` и укажите значения:
    - `TELEGRAM_BOT_TOKEN` — токен бота.
    - `CHANNEL_ID` — username канала (например `@volshebniye_tri_procenta`) или числовой ID.
    - `DATA_FILE` — путь к JSON для хранения постов.
