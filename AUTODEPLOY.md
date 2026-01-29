@@ -56,6 +56,11 @@
 ## 5. Диагностика при проблемах
 - Проверьте, что `PROJECT_DIR` не пустой и существует.
 - Проверьте, что ключи и права доступа корректны.
+- Если ручной запуск `./scripts/deploy.sh` сообщает, что `origin` не настроен, добавьте remote:
+  ```bash
+  git remote add origin https://github.com/<owner>/<repo>.git
+  git fetch origin
+  ```
 - Если GitHub Actions падает с ошибкой `detected dubious ownership`, добавьте каталог в список безопасных:
   ```bash
   git config --global --add safe.directory /opt/3percents

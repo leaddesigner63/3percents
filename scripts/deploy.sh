@@ -8,9 +8,12 @@ cd "$REPO_DIR"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-git fetch origin
-
-git reset --hard "origin/${current_branch}"
+if git remote get-url origin >/dev/null 2>&1; then
+  git fetch origin
+  git reset --hard "origin/${current_branch}"
+else
+  echo "WARNING: remote 'origin' не настроен, пропускаю git fetch/reset." >&2
+fi
 
 if [ ! -d "$VENV_DIR" ]; then
   python3 -m venv "$VENV_DIR"
