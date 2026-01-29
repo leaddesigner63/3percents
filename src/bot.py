@@ -31,6 +31,11 @@ class UserState:
 
 
 class ChannelCarouselBot:
+    _LEGACY_START_TEXT = "НАЧАЛО ТУТ!"
+    _LEGACY_START_LINK = "https://t.me/volshebniye_tri_procenta/3"
+    _NEW_START_TEXT = "ПОГНАЛИ?"
+    _NEW_START_LINK = "https://t.me/+EFyIgo-zvis0NWFi"
+
     def __init__(self, storage: PostStorage, channel_id: str) -> None:
         self._storage = storage
         self._channel_id = channel_id
@@ -76,6 +81,8 @@ class ChannelCarouselBot:
             state.index = min(state.index + 1, len(eligible) - 1)
         elif direction == "prev":
             state.index = max(state.index - 1, 0)
+        elif direction == "first":
+            state.index = 0
         await self._send_post(chat_id, user_id)
 
     async def _send_post(self, chat_id: int, user_id: int) -> None:
@@ -86,6 +93,10 @@ class ChannelCarouselBot:
         state = self._user_state.setdefault(user_id, UserState())
         state.index = max(0, min(state.index, len(eligible) - 1))
         post = eligible[state.index]
+        if self._is_legacy_start_screen(post):
+            markup = self._build_start_keyboard()
+            await self._replace_message(chat_id, user_id, self._NEW_START_TEXT, markup)
+            return
         markup = self._build_keyboard(state.index, len(eligible))
         await self._replace_message(chat_id, user_id, post, markup)
 
@@ -194,6 +205,22 @@ class ChannelCarouselBot:
         if row:
             buttons.append(row)
         return InlineKeyboardMarkup(buttons)
+
+    def _build_start_keyboard(self) -> InlineKeyboardMarkup:
+        buttons = [
+            [
+                InlineKeyboardButton("↩️ В начало", callback_data="nav:first"),
+                InlineKeyboardButton("Перейти", url=self._NEW_START_LINK),
+            ]
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def _is_legacy_start_screen(self, post: StoredPost) -> bool:
+        if post.kind != "text":
+            return False
+        if not post.text:
+            return False
+        return self._LEGACY_START_TEXT in post.text and self._LEGACY_START_LINK in post.text
 
     def _detect_kind(self, message) -> str:
         if message.photo:
