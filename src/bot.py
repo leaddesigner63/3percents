@@ -11,8 +11,6 @@ from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
     ContextTypes,
-    MessageHandler,
-    filters,
 )
 
 from src.config import load_config
@@ -39,23 +37,7 @@ class ChannelCarouselBot:
     def __init__(self, storage: PostStorage, channel_id: str) -> None:
         self._storage = storage
         self._channel_id = channel_id
-        self._channel_ids, self._channel_usernames = self._parse_channel_id(channel_id)
         self._user_state: Dict[int, UserState] = {}
-
-    async def handle_channel_post(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        message = update.channel_post
-        if message is None:
-            return
-        if not self._is_target_channel(message):
-            return
-
-        stored = StoredPost(
-            message_id=message.message_id,
-            kind=self._detect_kind(message),
-            file_id=self._extract_file_id(message),
-            text=message.text or message.caption,
-        )
-        self._storage.upsert(stored)
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if update.effective_chat is None or update.effective_user is None:
@@ -222,69 +204,11 @@ class ChannelCarouselBot:
             return False
         return self._LEGACY_START_TEXT in post.text and self._LEGACY_START_LINK in post.text
 
-    def _detect_kind(self, message) -> str:
-        if message.photo:
-            return "photo"
-        if message.video:
-            return "video"
-        if message.document:
-            return "document"
-        if message.audio:
-            return "audio"
-        if message.animation:
-            return "animation"
-        return "text"
-
-    def _extract_file_id(self, message) -> str | None:
-        if message.photo:
-            return message.photo[-1].file_id
-        if message.video:
-            return message.video.file_id
-        if message.document:
-            return message.document.file_id
-        if message.audio:
-            return message.audio.file_id
-        if message.animation:
-            return message.animation.file_id
-        return None
-
-    def _is_target_channel(self, message) -> bool:
-        chat_id = str(message.chat_id)
-        chat_username = (message.chat.username or "").lower()
-        if chat_id in self._channel_ids:
-            return True
-        if chat_username and chat_username in self._channel_usernames:
-            return True
-        return False
-
-    @staticmethod
-    def _parse_channel_id(channel_id: str) -> tuple[set[str], set[str]]:
-        raw = channel_id.strip()
-        normalized = raw
-        if normalized.startswith("https://t.me/"):
-            normalized = normalized.removeprefix("https://t.me/")
-            normalized = normalized.split("/", maxsplit=1)[0]
-
-        channel_ids: set[str] = set()
-        channel_usernames: set[str] = set()
-        if normalized.startswith("@"):
-            channel_usernames.add(normalized.lstrip("@").lower())
-        elif any(char.isalpha() for char in normalized):
-            channel_usernames.add(normalized.lower())
-        elif normalized:
-            channel_ids.add(normalized)
-            if normalized.startswith("-100"):
-                channel_ids.add(normalized.removeprefix("-100"))
-            elif normalized.isdigit():
-                channel_ids.add(f"-100{normalized}")
-
-        return channel_ids, channel_usernames
 
     def register(self, app) -> None:
         self._app = app
         app.add_handler(CommandHandler("start", self.start))
         app.add_handler(CallbackQueryHandler(self.on_nav, pattern=r"^nav:"))
-        app.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, self.handle_channel_post))
 
 
 def main() -> None:
@@ -295,7 +219,7 @@ def main() -> None:
     app = ApplicationBuilder().token(config.bot_token).build()
     bot.register(app)
 
-    app.run_polling(allowed_updates=["channel_post", "message", "callback_query"])
+    app.run_polling(allowed_updates=["message", "callback_query"])
 
 
 if __name__ == "__main__":

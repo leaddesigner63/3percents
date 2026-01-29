@@ -15,7 +15,7 @@ def load_config() -> Config:
     load_dotenv()
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
     channel_id = os.getenv("CHANNEL_ID", "").strip()
-    data_file = os.getenv("DATA_FILE", "data.json").strip()
+    data_file = os.getenv("DATA_FILE", "/var/lib/telegram-carousel-bot/posts.json").strip()
 
     if not bot_token:
         raise ValueError("TELEGRAM_BOT_TOKEN is required")
