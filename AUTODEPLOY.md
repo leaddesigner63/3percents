@@ -50,6 +50,14 @@
    sudo chmod 600 /etc/telegram-carousel-bot.env
    sudo chown root:root /etc/telegram-carousel-bot.env
    ```
+5. Заполните файл окружения реальными значениями:
+   ```bash
+   sudo tee /etc/telegram-carousel-bot.env >/dev/null <<'EOF'
+   TELEGRAM_BOT_TOKEN=ваш_токен_бота
+   CHANNEL_ID=@volshebniye_tri_procenta
+   DATA_FILE=/opt/3percents/data/posts.json
+   EOF
+   ```
 
 ## 3. Создание ключа для деплоя
 1. На машине, где будет храниться ключ (локально), сгенерируйте ключ:
