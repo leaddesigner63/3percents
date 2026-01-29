@@ -96,6 +96,11 @@
   ```
 - Если деплой падает с `python: command not found`, убедитесь, что установлен `python3` и `python3-venv`, а в PATH доступен `python3` (workflow использует `python3 -m venv`).
 - Если systemd сообщает `status=203/EXEC`, проверьте, что файл `<PROJECT_DIR>/.venv/bin/python` существует и unit-файл указывает корректный путь (`ExecStart=... -m src.bot`).
+- Если unit-файл указывает на старый путь (например, `/opt/3procenta/venv/bin/python -m bot.main`), выполните скрипт ремонта:
+  ```bash
+  ./scripts/fix_systemd_service.sh
+  ```
+  При необходимости запустите с `sudo` и/или передайте переменные `SERVICE_NAME` и `VENV_DIR`.
 - Если в `PROJECT_DIR` уже есть файлы без `.git`, деплой заново инициализирует репозиторий, сбросит состояние на `origin/main` и очистит мусорные файлы.
 - Проверьте логи сервиса:
   ```bash
