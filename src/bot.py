@@ -71,7 +71,7 @@ class ChannelCarouselBot:
         direction = query.data.split(":", maxsplit=1)[-1]
         eligible = eligible_posts(self._storage.load())
         if not eligible:
-            await self._replace_message(chat_id, user_id, "Нет доступных постов.")
+            await self._replace_message(chat_id, user_id, "Нет доступных постов. 🙂")
             return
         if direction == "next":
             state.index = min(state.index + 1, len(eligible) - 1)
@@ -82,7 +82,7 @@ class ChannelCarouselBot:
     async def _send_post(self, chat_id: int, user_id: int) -> None:
         eligible = eligible_posts(self._storage.load())
         if not eligible:
-            await self._replace_message(chat_id, user_id, "Нет доступных постов.")
+            await self._replace_message(chat_id, user_id, "Нет доступных постов. 🙂")
             return
         state = self._user_state.setdefault(user_id, UserState())
         state.index = max(0, min(state.index, len(eligible) - 1))
