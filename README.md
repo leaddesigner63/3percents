@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ## Запуск
 
 ```bash
-python -m src.bot
+./.venv/bin/python -m src.bot
 ```
 
 Бот получает новые посты через `channel_post` и сохраняет их. При `/start` бот показывает доступные посты в карусели.
@@ -29,10 +29,10 @@ python -m src.bot
 После установки unit-файла выполните:
 
 ```bash
-systemctl daemon-reload
-systemctl enable telegram-carousel-bot
-systemctl start telegram-carousel-bot
-systemctl status telegram-carousel-bot
+sudo systemctl daemon-reload
+sudo systemctl enable telegram-carousel-bot
+sudo systemctl start telegram-carousel-bot
+sudo systemctl status telegram-carousel-bot
 ```
 
 ## Деплой

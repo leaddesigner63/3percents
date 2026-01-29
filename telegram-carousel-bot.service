@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/workspace/3percents
+WorkingDirectory=/opt/3percents
 EnvironmentFile=/etc/telegram-carousel-bot.env
-ExecStart=/usr/bin/python3 -m src.bot
+ExecStart=/opt/3percents/.venv/bin/python -m src.bot
 Restart=always
 RestartSec=5
 

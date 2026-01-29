@@ -15,8 +15,8 @@ from telegram.ext import (
     filters,
 )
 
-from config import load_config
-from storage import PostStorage, StoredPost, eligible_posts
+from src.config import load_config
+from src.storage import PostStorage, StoredPost, eligible_posts
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
