@@ -21,3 +21,16 @@ python -m src.bot
 ```
 
 Бот получает новые посты через `channel_post` и сохраняет их. При `/start` бот показывает доступные посты в карусели.
+
+## Systemd
+
+Сервисный файл можно разместить, например, в `/etc/systemd/system/telegram-carousel-bot.service`, а переменные окружения — в `/etc/telegram-carousel-bot.env`. Пример unit-файла есть в репозитории: `telegram-carousel-bot.service`.
+
+После установки unit-файла выполните:
+
+```bash
+systemctl daemon-reload
+systemctl enable telegram-carousel-bot
+systemctl start telegram-carousel-bot
+systemctl status telegram-carousel-bot
+```
