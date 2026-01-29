@@ -34,15 +34,14 @@ class ChannelCarouselBot:
     def __init__(self, storage: PostStorage, channel_id: str) -> None:
         self._storage = storage
         self._channel_id = channel_id
-        self._channel_username = channel_id.lstrip("@")
+        self._channel_ids, self._channel_usernames = self._parse_channel_id(channel_id)
         self._user_state: Dict[int, UserState] = {}
 
     async def handle_channel_post(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message = update.channel_post
         if message is None:
             return
-        chat_username = message.chat.username or ""
-        if str(message.chat_id) != self._channel_id and chat_username != self._channel_username:
+        if not self._is_target_channel(message):
             return
 
         stored = StoredPost(
@@ -221,6 +220,38 @@ class ChannelCarouselBot:
         if message.animation:
             return message.animation.file_id
         return None
+
+    def _is_target_channel(self, message) -> bool:
+        chat_id = str(message.chat_id)
+        chat_username = (message.chat.username or "").lower()
+        if chat_id in self._channel_ids:
+            return True
+        if chat_username and chat_username in self._channel_usernames:
+            return True
+        return False
+
+    @staticmethod
+    def _parse_channel_id(channel_id: str) -> tuple[set[str], set[str]]:
+        raw = channel_id.strip()
+        normalized = raw
+        if normalized.startswith("https://t.me/"):
+            normalized = normalized.removeprefix("https://t.me/")
+            normalized = normalized.split("/", maxsplit=1)[0]
+
+        channel_ids: set[str] = set()
+        channel_usernames: set[str] = set()
+        if normalized.startswith("@"):
+            channel_usernames.add(normalized.lstrip("@").lower())
+        elif any(char.isalpha() for char in normalized):
+            channel_usernames.add(normalized.lower())
+        elif normalized:
+            channel_ids.add(normalized)
+            if normalized.startswith("-100"):
+                channel_ids.add(normalized.removeprefix("-100"))
+            elif normalized.isdigit():
+                channel_ids.add(f"-100{normalized}")
+
+        return channel_ids, channel_usernames
 
     def register(self, app) -> None:
         self._app = app
