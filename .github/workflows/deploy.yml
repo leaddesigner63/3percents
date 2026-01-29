@@ -56,6 +56,7 @@ jobs:
 
           mkdir -p "${PROJECT_DIR}"
           cd "${PROJECT_DIR}"
+          git config --global --add safe.directory "${PROJECT_DIR}"
 
           if [ ! -d .git ]; then
             git init
