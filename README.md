@@ -34,3 +34,13 @@ systemctl enable telegram-carousel-bot
 systemctl start telegram-carousel-bot
 systemctl status telegram-carousel-bot
 ```
+
+## Деплой
+
+Для обновления кода, зависимостей и перезапуска сервиса используйте скрипт:
+
+```bash
+./scripts/deploy.sh
+```
+
+Скрипт делает `git fetch` + `git reset --hard origin/<текущая-ветка>`, создаёт/обновляет venv в `.venv`, устанавливает зависимости и выполняет `systemctl restart telegram-carousel-bot`. При необходимости запускайте с правами, позволяющими выполнять `systemctl` (например, через `sudo`). 
