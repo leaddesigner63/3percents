@@ -40,5 +40,5 @@ class PostStorage:
 
 def eligible_posts(posts: List[StoredPost]) -> List[StoredPost]:
     if len(posts) < 3:
-        return posts
+        return []
     return posts[1:-1]

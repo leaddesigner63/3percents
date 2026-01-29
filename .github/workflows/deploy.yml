@@ -58,17 +58,35 @@ jobs:
           cd "${PROJECT_DIR}"
           git config --global --add safe.directory "${PROJECT_DIR}"
 
+          ENV_FILE="${ENV_FILE:-/etc/telegram-carousel-bot.env}"
+          DATA_FILE_PATH=""
+          if [ -f "${ENV_FILE}" ]; then
+            # shellcheck disable=SC1090
+            source "${ENV_FILE}"
+            DATA_FILE_PATH="${DATA_FILE:-}"
+          fi
+
           if [ ! -d .git ]; then
             git init
             git remote add origin "${REPO_URL}"
             git fetch --depth 1 origin main
             git checkout -f main
             git reset --hard origin/main
-            git clean -fdx
+            if [ -n "${DATA_FILE_PATH}" ] && [[ "${DATA_FILE_PATH}" == "${PROJECT_DIR}/"* ]]; then
+              data_rel="${DATA_FILE_PATH#${PROJECT_DIR}/}"
+              git clean -fdx -e "${data_rel}"
+            else
+              git clean -fdx
+            fi
           else
             git fetch origin main
             git reset --hard origin/main
-            git clean -fdx
+            if [ -n "${DATA_FILE_PATH}" ] && [[ "${DATA_FILE_PATH}" == "${PROJECT_DIR}/"* ]]; then
+              data_rel="${DATA_FILE_PATH#${PROJECT_DIR}/}"
+              git clean -fdx -e "${data_rel}"
+            else
+              git clean -fdx
+            fi
           fi
 
           if [ ! -d .venv ]; then

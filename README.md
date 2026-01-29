@@ -6,8 +6,8 @@
 
 1. Скопируйте `.env.example` в `.env` и укажите значения:
    - `TELEGRAM_BOT_TOKEN` — токен бота.
-   - `CHANNEL_ID` — username канала (например `@volshebniye_tri_procenta`) или числовой ID.
-   - `DATA_FILE` — путь к JSON для хранения постов.
+   - `CHANNEL_ID` — username канала (например `@volshebniye_tri_procenta` или `https://t.me/volshebniye_tri_procenta`) либо числовой ID (`-100...`).
+   - `DATA_FILE` — путь к JSON для хранения постов (рекомендуется вне репозитория, например `/var/lib/telegram-carousel-bot/posts.json`).
 2. Установите зависимости:
 
 ```bash

@@ -7,10 +7,23 @@ VENV_DIR="${VENV_DIR:-${REPO_DIR}/.venv}"
 cd "$REPO_DIR"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
+ENV_FILE="${ENV_FILE:-/etc/telegram-carousel-bot.env}"
+DATA_FILE_PATH=""
+if [ -f "$ENV_FILE" ]; then
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  DATA_FILE_PATH="${DATA_FILE:-}"
+fi
 
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch origin
   git reset --hard "origin/${current_branch}"
+  if [ -n "$DATA_FILE_PATH" ] && [[ "$DATA_FILE_PATH" == "$REPO_DIR/"* ]]; then
+    data_rel="${DATA_FILE_PATH#$REPO_DIR/}"
+    git clean -fdx -e "$data_rel"
+  else
+    git clean -fdx
+  fi
 else
   echo "WARNING: remote 'origin' не настроен, пропускаю git fetch/reset." >&2
 fi

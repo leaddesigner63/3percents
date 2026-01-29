@@ -55,8 +55,14 @@
    sudo tee /etc/telegram-carousel-bot.env >/dev/null <<'EOF'
    TELEGRAM_BOT_TOKEN=ваш_токен_бота
    CHANNEL_ID=@volshebniye_tri_procenta
-   DATA_FILE=/opt/3percents/data/posts.json
+   DATA_FILE=/var/lib/telegram-carousel-bot/posts.json
    EOF
+   ```
+6. Создайте директорию для данных и выдайте права:
+   ```bash
+   sudo mkdir -p /var/lib/telegram-carousel-bot
+   sudo chown -R root:root /var/lib/telegram-carousel-bot
+   sudo chmod 700 /var/lib/telegram-carousel-bot
    ```
 
 ## 3. Создание ключа для деплоя
