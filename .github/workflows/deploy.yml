@@ -76,16 +76,23 @@ jobs:
           fi
           .venv/bin/python -m pip install -r requirements.txt
           UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}.service"
+          VENV_DIR="${PROJECT_DIR}/.venv"
           if [ -f "telegram-carousel-bot.service" ]; then
+            rendered_unit="$(mktemp)"
+            sed \
+              -e "s|^WorkingDirectory=.*|WorkingDirectory=${PROJECT_DIR}|" \
+              -e "s|^ExecStart=.*|ExecStart=${VENV_DIR}/bin/python -m src.bot|" \
+              "telegram-carousel-bot.service" > "${rendered_unit}"
             if [ -w "${UNIT_PATH}" ] || [ -w "$(dirname "${UNIT_PATH}")" ]; then
-              cp "telegram-carousel-bot.service" "${UNIT_PATH}"
+              cp "${rendered_unit}" "${UNIT_PATH}"
               systemctl daemon-reload
             elif command -v sudo >/dev/null 2>&1 && sudo -n true; then
-              sudo cp "telegram-carousel-bot.service" "${UNIT_PATH}"
+              sudo cp "${rendered_unit}" "${UNIT_PATH}"
               sudo systemctl daemon-reload
             else
               echo "WARNING: нет прав на обновление systemd unit-файла (${UNIT_PATH})." >&2
             fi
+            rm -f "${rendered_unit}"
           fi
 
           if command -v sudo >/dev/null 2>&1 && ! [ "$(id -u)" -eq 0 ]; then

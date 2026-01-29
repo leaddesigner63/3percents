@@ -43,6 +43,7 @@
    Убедитесь, что в unit-файле указан актуальный путь:
    - `WorkingDirectory=/opt/3percents`
    - `ExecStart=/opt/3percents/.venv/bin/python -m src.bot`
+   Скрипты деплоя дополнительно переписывают unit-файл, подставляя фактический `PROJECT_DIR`.
 4. Убедитесь, что у сервиса есть доступ к переменным окружения:
    ```bash
    sudo touch /etc/telegram-carousel-bot.env
@@ -94,7 +95,7 @@
   git config --global --add safe.directory /opt/3percents
   ```
 - Если деплой падает с `python: command not found`, убедитесь, что установлен `python3` и `python3-venv`, а в PATH доступен `python3` (workflow использует `python3 -m venv`).
-- Если systemd сообщает `status=203/EXEC`, проверьте, что файл `/opt/3percents/.venv/bin/python` существует и unit-файл указывает корректный путь.
+- Если systemd сообщает `status=203/EXEC`, проверьте, что файл `<PROJECT_DIR>/.venv/bin/python` существует и unit-файл указывает корректный путь (`ExecStart=... -m src.bot`).
 - Если в `PROJECT_DIR` уже есть файлы без `.git`, деплой заново инициализирует репозиторий, сбросит состояние на `origin/main` и очистит мусорные файлы.
 - Проверьте логи сервиса:
   ```bash
