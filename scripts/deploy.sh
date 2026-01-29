@@ -24,7 +24,8 @@ source "$VENV_DIR/bin/activate"
 
 pip install -r requirements.txt
 
-UNIT_PATH="/etc/systemd/system/telegram-carousel-bot.service"
+SERVICE_NAME="${SERVICE_NAME:-telegram-carousel-bot}"
+UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}.service"
 if [ -f "$REPO_DIR/telegram-carousel-bot.service" ]; then
   rendered_unit="$(mktemp)"
   sed \
@@ -43,8 +44,16 @@ if [ -f "$REPO_DIR/telegram-carousel-bot.service" ]; then
   rm -f "$rendered_unit"
 fi
 
-if command -v sudo >/dev/null 2>&1 && ! [ "$(id -u)" -eq 0 ]; then
-  sudo systemctl restart telegram-carousel-bot
+if command -v systemctl >/dev/null 2>&1; then
+  if [ -f "$UNIT_PATH" ] || systemctl list-unit-files --type=service --no-legend | awk '{print $1}' | grep -qx "${SERVICE_NAME}.service"; then
+    if command -v sudo >/dev/null 2>&1 && ! [ "$(id -u)" -eq 0 ]; then
+      sudo systemctl restart "${SERVICE_NAME}"
+    else
+      systemctl restart "${SERVICE_NAME}"
+    fi
+  else
+    echo "WARNING: systemd unit ${SERVICE_NAME}.service не найден, пропускаю рестарт." >&2
+  fi
 else
-  systemctl restart telegram-carousel-bot
+  echo "WARNING: systemctl не найден, пропускаю рестарт сервиса ${SERVICE_NAME}." >&2
 fi

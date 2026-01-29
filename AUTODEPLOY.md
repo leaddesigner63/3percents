@@ -73,6 +73,7 @@
 - `DEPLOY_USER` — пользователь для SSH.
 - `PROJECT_DIR` — директория проекта на сервере (например, `/opt/3percents`).
 - `SERVICE_NAME` — имя systemd сервиса (например, `telegram-carousel-bot`).
+  Если секрет не задан, workflow использует значение по умолчанию `telegram-carousel-bot`.
 
 ## 5. Проверка деплоя
 1. Сделайте push в ветку `main`.
@@ -96,6 +97,7 @@
   ```
 - Если деплой падает с `python: command not found`, убедитесь, что установлен `python3` и `python3-venv`, а в PATH доступен `python3` (workflow использует `python3 -m venv`).
 - Если systemd сообщает `status=203/EXEC`, проверьте, что файл `<PROJECT_DIR>/.venv/bin/python` существует и unit-файл указывает корректный путь (`ExecStart=... -m src.bot`).
+- Если при деплое видно `Unit ... not found`, убедитесь, что unit-файл установлен и имя в `SERVICE_NAME` совпадает с фактическим сервисом. При отсутствии unit-файла рестарт пропускается и деплой завершится с предупреждением.
 - Если unit-файл указывает на старый путь (например, `/opt/3procenta/venv/bin/python -m bot.main`), выполните скрипт ремонта:
   ```bash
   ./scripts/fix_systemd_service.sh
