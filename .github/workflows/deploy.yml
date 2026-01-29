@@ -2,8 +2,7 @@ name: Deploy 3percents
 
 on:
   push:
-    branches: [ "work" ]
-  workflow_dispatch:
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -13,70 +12,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Prepare SSH
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Всегда сканируем ключ хоста заново (устраняет host key mismatch)
+          SSH_PORT="${{ secrets.SSH_PORT }}"
+          if [ -z "${SSH_PORT}" ]; then
+            SSH_PORT="22"
+          fi
+
           rm -f ~/.ssh/known_hosts
-          ssh-keyscan -p "${{ secrets.DEPLOY_PORT }}" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "${SSH_PORT}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Sync project to server (rsync)
+      - name: Deploy via SSH
         shell: bash
         run: |
           set -euo pipefail
 
-          # Исключаем то, что нельзя трогать на сервере
-          RSYNC_EXCLUDES=(
-            --exclude ".git/"
-            --exclude ".github/"
-            --exclude "venv/"
-            --exclude ".env"
-            --exclude "data/"
-            --exclude "logs/"
-            --exclude "__pycache__/"
-            --exclude "*.pyc"
-            --exclude "*.db"
-          )
+          SSH_PORT="${{ secrets.SSH_PORT }}"
+          if [ -z "${SSH_PORT}" ]; then
+            SSH_PORT="22"
+          fi
 
-          rsync -az --delete \
-            "${RSYNC_EXCLUDES[@]}" \
-            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=yes" \
-            ./ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.PROJECT_DIR }}/"
-
-      - name: Install deps & restart systemd service
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.DEPLOY_PORT }}" \
+          ssh -i ~/.ssh/id_ed25519 -p "${SSH_PORT}" \
             -o StrictHostKeyChecking=yes \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
             "set -euo pipefail
-             cd '${{ secrets.PROJECT_DIR }}'
-
-             # venv не удаляем никогда; если нет - создаём
-             if [ ! -x venv/bin/python ]; then
-               python3 -m venv venv
-             fi
-
-             # pip через python -m pip (надежнее)
-             if ! venv/bin/python -m pip --version >/dev/null 2>&1; then
-               venv/bin/python -m ensurepip --upgrade
-             fi
-
-             venv/bin/python -m pip install -U pip setuptools wheel
-
-             if [ -f requirements.txt ]; then
-               venv/bin/python -m pip install -r requirements.txt
-             fi
-
-             systemctl daemon-reload || true
+             cd '${{ secrets.APP_DIR }}'
+             git pull
+             python -m venv venv
+             venv/bin/python -m pip install -r requirements.txt
              systemctl restart '${{ secrets.SERVICE_NAME }}'
-             systemctl is-active --quiet '${{ secrets.SERVICE_NAME }}'
-             systemctl --no-pager --full status '${{ secrets.SERVICE_NAME }}'
             "
