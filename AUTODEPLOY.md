@@ -65,6 +65,7 @@
   ```bash
   git config --global --add safe.directory /opt/3percents
   ```
+- Если деплой падает с `python: command not found`, убедитесь, что установлен `python3` и `python3-venv`, а в PATH доступен `python3` (workflow использует `python3 -m venv`).
 - Если в `PROJECT_DIR` уже есть файлы без `.git`, деплой заново инициализирует репозиторий, сбросит состояние на `origin/main` и очистит мусорные файлы.
 - Проверьте логи сервиса:
   ```bash

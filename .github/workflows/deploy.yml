@@ -71,7 +71,9 @@ jobs:
             git clean -fdx
           fi
 
-          python -m venv venv
-          venv/bin/python -m pip install -r requirements.txt
+          if [ ! -d .venv ]; then
+            python3 -m venv .venv
+          fi
+          .venv/bin/python -m pip install -r requirements.txt
           systemctl restart "${SERVICE_NAME}"
           EOF
