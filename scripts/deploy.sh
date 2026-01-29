@@ -24,4 +24,21 @@ source "$VENV_DIR/bin/activate"
 
 pip install -r requirements.txt
 
-systemctl restart telegram-carousel-bot
+UNIT_PATH="/etc/systemd/system/telegram-carousel-bot.service"
+if [ -f "$REPO_DIR/telegram-carousel-bot.service" ]; then
+  if [ -w "$UNIT_PATH" ] || [ -w "$(dirname "$UNIT_PATH")" ]; then
+    cp "$REPO_DIR/telegram-carousel-bot.service" "$UNIT_PATH"
+    systemctl daemon-reload
+  elif command -v sudo >/dev/null 2>&1 && sudo -n true; then
+    sudo cp "$REPO_DIR/telegram-carousel-bot.service" "$UNIT_PATH"
+    sudo systemctl daemon-reload
+  else
+    echo "WARNING: нет прав на обновление systemd unit-файла (${UNIT_PATH})." >&2
+  fi
+fi
+
+if command -v sudo >/dev/null 2>&1 && ! [ "$(id -u)" -eq 0 ]; then
+  sudo systemctl restart telegram-carousel-bot
+else
+  systemctl restart telegram-carousel-bot
+fi
