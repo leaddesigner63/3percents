@@ -58,9 +58,16 @@ jobs:
           cd "${PROJECT_DIR}"
 
           if [ ! -d .git ]; then
-            git clone --depth 1 "${REPO_URL}" .
+            git init
+            git remote add origin "${REPO_URL}"
+            git fetch --depth 1 origin main
+            git checkout -f main
+            git reset --hard origin/main
+            git clean -fdx
           else
-            git pull --ff-only
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fdx
           fi
 
           python -m venv venv
