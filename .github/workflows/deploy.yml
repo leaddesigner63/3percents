@@ -47,8 +47,22 @@ jobs:
             -o StrictHostKeyChecking=yes \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
             "set -euo pipefail
-             cd '${{ secrets.PROJECT_DIR }}'
-             git pull
+             PROJECT_DIR='${{ secrets.PROJECT_DIR }}'
+             REPO_URL='https://github.com/${{ github.repository }}.git'
+
+             if [ -z \"${PROJECT_DIR}\" ]; then
+               echo 'ERROR: PROJECT_DIR secret is empty.'
+               exit 1
+             fi
+
+             mkdir -p \"${PROJECT_DIR}\"
+             cd \"${PROJECT_DIR}\"
+
+             if [ ! -d .git ]; then
+               git clone --depth 1 \"${REPO_URL}\" .
+             else
+               git pull --ff-only
+             fi
              python -m venv venv
              venv/bin/python -m pip install -r requirements.txt
              systemctl restart '${{ secrets.SERVICE_NAME }}'
