@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY_B64 }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           SSH_PORT="${{ secrets.DEPLOY_PORT }}"
