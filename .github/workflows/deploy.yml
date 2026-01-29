@@ -46,24 +46,24 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 -p "${SSH_PORT}" \
             -o StrictHostKeyChecking=yes \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "set -euo pipefail
-             PROJECT_DIR='${{ secrets.PROJECT_DIR }}'
-             REPO_URL='https://github.com/${{ github.repository }}.git'
+            PROJECT_DIR="${{ secrets.PROJECT_DIR }}" \
+            REPO_URL="https://github.com/${{ github.repository }}.git" \
+            SERVICE_NAME="${{ secrets.SERVICE_NAME }}" \
+            bash -s <<'EOF'
+          set -euo pipefail
 
-             if [ -z \"${PROJECT_DIR}\" ]; then
-               echo 'ERROR: PROJECT_DIR secret is empty.'
-               exit 1
-             fi
+          : "${PROJECT_DIR:?ERROR: PROJECT_DIR secret is empty.}"
 
-             mkdir -p \"${PROJECT_DIR}\"
-             cd \"${PROJECT_DIR}\"
+          mkdir -p "${PROJECT_DIR}"
+          cd "${PROJECT_DIR}"
 
-             if [ ! -d .git ]; then
-               git clone --depth 1 \"${REPO_URL}\" .
-             else
-               git pull --ff-only
-             fi
-             python -m venv venv
-             venv/bin/python -m pip install -r requirements.txt
-             systemctl restart '${{ secrets.SERVICE_NAME }}'
-            "
+          if [ ! -d .git ]; then
+            git clone --depth 1 "${REPO_URL}" .
+          else
+            git pull --ff-only
+          fi
+
+          python -m venv venv
+          venv/bin/python -m pip install -r requirements.txt
+          systemctl restart "${SERVICE_NAME}"
+          EOF
